@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetario</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --text-main: #f5f5f7;
+            --text-muted: #86868b;
+            --accent: #0a84ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            padding: 2rem;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 2rem auto;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .iframe-container {
+            width: 100%;
+            height: 580px; /* Altura ideal para contenido vertical */
+            background-color: #000;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .card-footer {
+            padding: 16px;
+            text-align: center;
+        }
+
+        .card-footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .card-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Recetario 🍳</h1>
+        <p class="subtitle">Nuevas ideas para cocinar</p>
+    </header>
+
+    <main class="grid" id="recipe-grid">
+        <!-- Las recetas se inyectarán aquí -->
+    </main>
+
+    <script>
+        // 1. Pega aquí todos los links que vayas encontrando
+        const recipeLinks = [
+            "https://www.instagram.com/p/DOYOVMiCPRK/",
+            "https://www.instagram.com/p/DQFQuGrjDX2/",
+            "https://www.instagram.com/p/DPUbIXPjJHu/",
+				"https://www.instagram.com/p/DPmXMiMjFjO/",
+				"https://www.instagram.com/p/DOlx5D8EVpv/",
+				"https://www.instagram.com/p/DPOHGPAiEPJ/",
+				"https://www.instagram.com/p/DOVnSSqiE0u/",
+				"https://www.instagram.com/p/DQtr2EODGx6/",
+				"https://www.instagram.com/p/DRepHZHCPSt/",
+				"https://www.instagram.com/p/DdmrG2iDs1k/",
+				"https://www.instagram.com/p/DZ1x2r2TiTI/",
+				"https://www.instagram.com/p/DabedTSvYet/",
+				"https://www.instagram.com/p/DZqwsTRJ6S9/",
+				"https://www.instagram.com/p/DVyCgRLk_Qp/",
+				"https://www.instagram.com/p/DTqVcDwDQpf/",
+				"https://www.instagram.com/p/DUV_kvNDUaC/",
+				"https://www.instagram.com/p/DTvZX8xCD0p/",
+				"https://www.instagram.com/p/DUahYjYjThb/",
+				"https://www.instagram.com/p/DUi-w4hiKe8/",
+				"https://www.tiktok.com/@cocinaconmario/video/7527001502565551382"
+        ];
+
+        // 2. Lógica para extraer los IDs y generar los embeds
+        function getEmbedData(url) {
+            try {
+                if (url.includes('tiktok.com')) {
+                    const match = url.match(/video\/(\d+)/);
+                    if (match) {
+                        return {
+                            type: 'TikTok',
+                            embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+                            originalUrl: url
+                        };
+                    }
+                } else if (url.includes('instagram.com')) {
+                    const match = url.match(/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+                    if (match) {
+                        return {
+                            type: 'Instagram',
+                            embedUrl: `https://www.instagram.com/p/${match[1]}/embed/captioned`,
+                            originalUrl: url
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error("Error parseando URL:", url);
+            }
+            return null;
+        }
+
+        // 3. Renderizar el grid
+        const grid = document.getElementById('recipe-grid');
+
+        recipeLinks.forEach(link => {
+            const data = getEmbedData(link);
+            
+            if (data) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                card.innerHTML = `
+                    <div class="iframe-container">
+                        <iframe src="${data.embedUrl}" 
+                                scrolling="no" 
+                                allowtransparency="true" 
+                                allow="encrypted-media">
+                        </iframe>
+                    </div>
+                    <div class="card-footer">
+                        <a href="${data.originalUrl}" target="_blank" rel="noopener noreferrer">
+                            Ver original en ${data.type}
+                        </a>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            }
+        });
+    </script>
+</body>
+</html>
